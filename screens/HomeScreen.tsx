@@ -1,72 +1,84 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Alert, FlatList, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackParamList } from "../typings/navigations";
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useDispatch, useSelector } from 'react-redux';
-import { State } from 'react-native-gesture-handler';
-import { signup } from "../src/store/actions/user.actions";
-import { loginUser } from "../src/store/actions/login.actions";
-
-type ScreenNavigationType = NativeStackNavigationProp<
-    StackParamList,
-    "HomeScreen"
->
+import * as SecureStore from "expo-secure-store";
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Button,
+  ImageBackground,
+} from "react-native";
+import { useDispatch } from "react-redux";
+import { rehydrateUser, signup, login } from "../src/store/actions/user.actions";
 
 export default function HomeScreen() {
-  const [text, setText] = useState('')
-  const [passwordStr, setPasswordStr] = useState('')
-  const dispatch = useDispatch() // hook to get
-    
-  function handleLoginUser () {
-    const email = text;
-    const pw = passwordStr;
+  const [email, setEmail] = useState("");
+  const [passwordStr, setPasswordStr] = useState("");
+  const dispatch = useDispatch(); // hook to get
 
-    dispatch(loginUser(email,pw));
+  async function readPersistedUserInfo() {
+    const token = await SecureStore.getItemAsync("idToken");
+    const userJson = await SecureStore.getItemAsync("user");
+    let user = null;
+    if (userJson) {
+      user = JSON.parse(userJson);
+    }
+    if (user) {
+      // then we have a priv. login
+      // restore the signup by updating the redux store based on usre and token.
+      dispatch(rehydrateUser(user, token!));
+    }
   }
 
-  function handleAddUser () {
-    const email = text;
-    const pw = passwordStr;
-
-    dispatch(signup(email,pw));
+  const handleLogin = () => {
+    dispatch(login(email, passwordStr));
 }
 
-return (
-  <ImageBackground
-        style={styles.background}
-         source={require("../assets/background.jpg")}
-        >
-  <View style={styles.container}>
-      <Text>Home Screen</Text>
-      <TextInput value={text} onChangeText={setText} style={styles.textInput} placeholder="EMAIL" />
-      <TextInput value={passwordStr} onChangeText={setPasswordStr} style={styles.textInput} placeholder="PASSWORD"/>
-      <Button title="Add User" onPress={handleAddUser} />
-      <Button title="Login" onPress={handleLoginUser} />
-  </View>
-  </ImageBackground>
-);
+  useEffect(() => {
+    readPersistedUserInfo();
+  }, []);
 
-    
-  }
-  const styles = StyleSheet.create({
-      container: {
-        position: "absolute",
-       top: 70,
-       alignItems: "center",
-      },
-      text: {
-          fontSize: 42,
-        },
-        textInput: {
-          fontSize: 42,
-          borderBottomWidth : 1.0
-        },
-        background: {
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          resizeMode: "cover",
-          
-      },
-  })
+  return (
+    <ImageBackground
+      style={styles.background}
+      source={require("../assets/background.jpg")}
+    >
+      <View style={styles.container}>
+        <Text>Home Screen</Text>
+        <TextInput value={email} placeholder="email" onChangeText={setEmail} />
+        <TextInput
+        secureTextEntry={true}
+          value={passwordStr}
+          placeholder="password"
+          onChangeText={setPasswordStr}
+        />
+        <Button
+          title="Signup"
+          onPress={() => dispatch(signup(email, passwordStr))}
+        />
+        <Button title="Login"  
+        onPress={() => dispatch(handleLogin)} /> 
+      </View>
+    </ImageBackground>
+  );
+}
+const styles = StyleSheet.create({
+  container: {
+    position: "absolute",
+    top: 70,
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 42,
+  },
+  textInput: {
+    fontSize: 42,
+    borderBottomWidth: 1.0,
+  },
+  background: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    resizeMode: "cover",
+  },
+});

@@ -10,8 +10,6 @@ type ScreenNavigationType = NativeStackNavigationProp<
     "Screen1"
 >
 
-
-
 export default function Screen1() {
   const navigation = useNavigation<ScreenNavigationType>();
   return (

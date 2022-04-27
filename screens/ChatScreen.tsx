@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   FlatList,
@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Chatroom, Status } from "../entities/Chatroom";
-import { addChatroom } from "../src/store/actions/chat.actions";
+import { addChatroom, fetchChatrooms } from "../src/store/actions/chat.actions";
 import { StackParamList } from "../typings/navigations";
 
 type ScreenNavigationType = NativeStackNavigationProp<
@@ -26,7 +26,12 @@ export default function Chat1() {
 
   const chatrooms: Chatroom[] = useSelector(
     (state: any) => state.chat.chatrooms
-  );
+  )
+
+  useEffect(() => { // only runs dispatch the first time the component renders
+    dispatch(fetchChatrooms())
+}, [])
+
 
   const handleAddChatroom = () => {
     const chatroom: Chatroom = new Chatroom(
@@ -37,8 +42,6 @@ export default function Chat1() {
     );
     dispatch(addChatroom(chatroom));
   };
-
-  
 
   const renderChatroom = ({ item }: { item: any }) => (
     <Text>{item.title}</Text>

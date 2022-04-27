@@ -1,18 +1,16 @@
 import { Chatroom } from "../../../entities/Chatroom";
-import { ADD_CHATROOM } from "../actions/chat.actions";
+import { ADD_CHATROOM, FETCH_CHATROOMS } from "../actions/chat.actions";
 
 interface ReduxState {
     chatrooms: Chatroom[]
-    isHappy: boolean
     counter: number
     name: string
 }
 
 const initialState: ReduxState = {
     chatrooms: [],
-    isHappy: false,
     counter: 0,
-    name: "Peter"
+    name: "Patrick"
 }
 
 interface ReduxAction {
@@ -29,6 +27,9 @@ const chatReducer = (state: ReduxState = initialState, action: ReduxAction) => {
             //state.chatrooms.push(chatroom) // mutating state. Not allowed
             return { ...state, chatrooms: [...state.chatrooms, chatroom] }
 
+            case FETCH_CHATROOMS:
+            // create a new state object with the action.payload assigned to the chatrooms array.
+            return { ...state, chatrooms: action.payload }
 
         default:
             return state;

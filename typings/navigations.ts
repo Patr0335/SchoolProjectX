@@ -7,5 +7,6 @@ export type StackParamList = {
     HomeScreen: undefined;
     Notifications: undefined;
     NavigationScreen: undefined;
-    MessageScreen: undefined;
+    Profile: undefined;
+    EditProfile: undefined;
 }
